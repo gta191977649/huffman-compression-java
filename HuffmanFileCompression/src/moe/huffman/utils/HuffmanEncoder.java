@@ -6,15 +6,34 @@ import java.util.Map;
 public class HuffmanEncoder {
     public static final int AlphabetSize = 256;
 
-    public String compress(String data) {
+    public HuffmanEncodedResult compress(String data) {
         int [] freq = buildFreqTable(data);
         HuffmanTree tree = new HuffmanTree(freq);
         Node root = tree.getHuffmanTree();
         Map<Character,String> lookupTable = getLookUptable(root);
         String encodedData = generateEncodedData(data,lookupTable);
-        return encodedData;
+        return new HuffmanEncodedResult(encodedData,root);
     }
-
+    //解压
+    public String decompress (HuffmanEncodedResult result) {
+        StringBuilder stringBuilder = new StringBuilder();
+        Node current = result.getRoot();
+        int i =0;
+        while (i < result.getEncodedData().length()) {
+            while(!current.isLeaf()) {
+                char bit = result.getEncodedData().charAt(i);
+                if(bit == '1') {
+                    current = current.getRight();
+                } else if (bit == '0') {
+                    current = current.getLeft();
+                }
+                i++;
+            }
+            stringBuilder.append(current.getCharacter());
+            current = result.getRoot();
+        }
+        return stringBuilder.toString();
+    }
     private String generateEncodedData(String data, Map<Character,String> lookupTable) {
         StringBuilder strBuilder = new StringBuilder();
         //Get binary data for each char
